@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/mdreader.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="js/mdreader.js"></script>
+    <script type="text/javascript">
+      mdreader.init('YOUR_APP_ID',
+                    ['https://www.googleapis.com/auth/drive',
+                     'https://www.googleapis.com/auth/drive.install']);
+
+      function handleClientLoad() {
+        window.setTimeout(mdreader.checkAuth, 1);
+      };
+    </script>
+    <script type="text/javascript" src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+    <script type="text/javascript" src="js/markdown.js"></script>
+    <title>mdReader -- A markdown reader for Google Drive</title>
+  </head>
+  <body  data-spy="scroll" data-target=".bs-docs-sidebar">
+    <input type="button" id="authorizeButton" style="display: none" value="Authorize" />
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="nav-collapse collapse">
+            <ul class="nav" id="topNav">
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <header class="jumbotron subhead"></header>
+
+    <div id="mdHtmlDisplay" class="container"></div>
+
+    <footer class="footer">
+      <div class="container">
+         Markdown Reader
+      </div>
+    </footer>
+
+  </body>
+</html>
