@@ -1,6 +1,8 @@
 (function( expose ) {
       var CLIENT_ID = null;
       var SCOPES = null;
+      var authuserIndex = 0;
+      var authuserIndexLimit = 5;
 
       /**
        * Init the google CLIENT_ID nad SCOPES
@@ -13,11 +15,12 @@
       /**
        * Check if the current user has authorized the application.
        */
-      expose.checkAuth = function checkAuth() {
+      function checkAuth() {
         gapi.auth.authorize(
-            {'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true},
+            {'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true, 'authuser':authuserIndex},
             handleAuthResult);
       };
+      expose.checkAuth = checkAuth;
 
       /**
        * Append a link in a <ul></ul>.
@@ -83,6 +86,43 @@
       }
  
       /**
+       * Popup a authorize window.
+       */
+      function popupAuth(){
+          mdHtmlDisplay.innerHTML = "<p><br/><br/>Please allow the popup window to authorize the access.</p>";
+          gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'authuser':''},
+                              handleAuthResult);
+      }
+
+      /**
+       * Check if userId, if not right popup a auth window
+       *
+       * @param (Object) the userid in page request.
+       * @docId (String) the document id.
+       */
+      function checkAuthuser(userId, docId){
+          var accessToken = gapi.auth.getToken().access_token;
+          var request = gapi.client.request({
+              'path': '/oauth2/v1/tokeninfo/?access_token=' + accessToken,
+              'method': 'GET'});
+          callback = function(resp) {
+              if(resp.user_id.toString() !== userId.toString()) {
+                  authuserIndex++;
+                  if(authuserIndex < authuserIndexLimit){
+                     checkAuth();
+                  }
+                  else{
+                     popupAuth();
+                  }
+              }
+              else{
+		  getDocumentInfo(docId);
+              }
+          };
+          request.execute(callback);
+      }
+
+      /**
        * Called when authorization server replies.
        *
        * @param {Object} authResult Authorization result.
@@ -93,10 +133,16 @@
         if (authResult && !authResult.error) {
           // Access token has been successfully retrieved, requests can be sent to the API.
           var queryState = qs("state");
-          if(queryState != undefined){
+          if(queryState !== undefined){
               queryState = JSON.parse(unescape(queryState));
               if(queryState["action"] === 'open'){
-                getDocumentInfo(queryState['ids'][0]);
+                var docId = queryState['ids'][0]; 
+                if(queryState["userId"] !== undefined && queryState["userId"] !== null){
+                   checkAuthuser(queryState["userId"], docId);
+                }
+                else{
+                   getDocumentInfo(docId);
+                }
               }
           }
           else{
@@ -104,8 +150,7 @@
           }
         } else {
           // No access token could be retrieved, show the button to start the authorization flow.
-          gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false},
-                              handleAuthResult);
+          popupAuth();
         }
       }
 

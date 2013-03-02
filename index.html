@@ -10,7 +10,8 @@
     <script type="text/javascript">
       mdreader.init('YOUR_APP_ID',
                     ['https://www.googleapis.com/auth/drive',
-                     'https://www.googleapis.com/auth/drive.install']);
+                     'https://www.googleapis.com/auth/drive.install',
+					 'https://www.googleapis.com/auth/userinfo.profile']);
 
       function handleClientLoad() {
         window.setTimeout(mdreader.checkAuth, 1);
