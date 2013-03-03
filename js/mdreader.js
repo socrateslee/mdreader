@@ -1,15 +1,16 @@
 (function( expose ) {
       var CLIENT_ID = null;
-      var SCOPES = null;
+      var SCOPES = ['https://www.googleapis.com/auth/drive',
+                    'https://www.googleapis.com/auth/drive.install',
+                    'https://www.googleapis.com/auth/userinfo.profile'];
       var authuserIndex = 0;
       var authuserIndexLimit = 5;
 
       /**
        * Init the google CLIENT_ID nad SCOPES
        */
-      expose.init = function init(clientID, scopes){
+      expose.init = function init(clientID){
           CLIENT_ID = clientID;
-          SCOPES = scopes;
       };
 
       /**
@@ -48,6 +49,17 @@
       }
 
       /**
+       * Get the outbound link for opening with mdReader.
+       *
+       * @param (String) the id of document.
+       */
+      function getOutboundLink(id) {
+          var link = window.location.origin + window.location.pathname;
+          link += '?state=' + JSON.stringify({'action': 'open', 'ids': [id]});
+          return link
+      }
+
+      /**
        * Called for get the info of a document.
        *
        * @param {String} id Document id.
@@ -58,7 +70,7 @@
               'path': '/drive/v2/files/' + id,
               'method': 'GET'});
           callback = function(resp) {
-              appendLink(topNav, resp.webContentLink, resp.title);
+              appendLink(topNav, getOutboundLink(id), resp.title);
               if(resp.downloadUrl){
                   getDocumentContent(resp.downloadUrl);
               }

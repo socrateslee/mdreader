@@ -8,10 +8,7 @@
     <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="js/mdreader.js"></script>
     <script type="text/javascript">
-      mdreader.init('YOUR_APP_ID',
-                    ['https://www.googleapis.com/auth/drive',
-                     'https://www.googleapis.com/auth/drive.install',
-					 'https://www.googleapis.com/auth/userinfo.profile']);
+      mdreader.init('622056481638.apps.googleusercontent.com');
 
       function handleClientLoad() {
         window.setTimeout(mdreader.checkAuth, 1);
@@ -40,7 +37,8 @@
 
     <footer class="footer">
       <div class="container">
-         Markdown Reader
+         <p>mdReader -- A simple Markdown reader for Google Drive</p>
+         <p>Open sourced at <a href="https://github.com/socrateslee/mdreader">github.com/socrateslee/mdreader</a>.</p>
       </div>
     </footer>
 
