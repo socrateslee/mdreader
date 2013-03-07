@@ -54,7 +54,7 @@
        * @param (String) the id of document.
        */
       function getOutboundLink(id) {
-          var link = window.location.origin + window.location.pathname;
+          var link = window.location.protocol + "//" + window.location.host + window.location.pathname;
           link += '?state=' + JSON.stringify({'action': 'open', 'ids': [id]});
           return link
       }
@@ -71,6 +71,7 @@
               'method': 'GET'});
           callback = function(resp) {
               appendLink(topNav, getOutboundLink(id), resp.title);
+              document.title = "[" + resp.title + "]" + "mdReader -- Markdown reader for Google Drive";
               if(resp.downloadUrl){
                   getDocumentContent(resp.downloadUrl);
               }
@@ -91,7 +92,7 @@
           xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
           xhr.onload = function() {
               var mdText = xhr.responseText;
-              var mdHtml = markdown.toHTML(mdText);
+              var mdHtml = marked.parse(mdText);
               mdHtmlDisplay.innerHTML = "<br/><br/>" + mdHtml;
           };
           xhr.send()
