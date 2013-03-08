@@ -26,10 +26,13 @@
       /**
        * Append a link in a <ul></ul>.
        */
-      function appendLink(parent, href, text) {
+      function appendLink(parent, href, text, title) {
         var link = document.createElement("a");
         link.href = href;
         link.textContent = text;
+        if(title !== undefined) {
+            link.title = title;
+        }
         parent.appendChild(document.createElement("li")).appendChild(link);
       }
 
@@ -70,10 +73,15 @@
               'path': '/drive/v2/files/' + id,
               'method': 'GET'});
           callback = function(resp) {
-              appendLink(topNav, getOutboundLink(id), resp.title);
-              document.title = "[" + resp.title + "]" + "mdReader -- Markdown reader for Google Drive";
-              if(resp.downloadUrl){
-                  getDocumentContent(resp.downloadUrl);
+              if(!resp.error){
+                  appendLink(topNav, getOutboundLink(id), resp.title, 'Please right click copy the link address for sharing.');
+                  document.title = "[" + resp.title + "]" + "mdReader -- Markdown reader for Google Drive";
+                  if(resp.downloadUrl){
+                      getDocumentContent(resp.downloadUrl);
+                  }
+              }
+              else{
+                  checkAuthuser(null, id);
               }
           };
           request.execute(callback);
@@ -99,10 +107,21 @@
       }
  
       /**
-       * Popup a authorize window.
+       * Init the authorize process.
+       */
+      function doAuth(){
+          mdHtmlDisplay.innerHTML = "<p><br/><br/>Please allow the popup window to authorize the access, <br/>"
+                                    + "or manually click <input type=\"button\" id=\"authorizeButton\" value=\"Authorize\" />"
+                                    + " if popup window is blocked.</p>";
+          var authButton = document.getElementById('authorizeButton');
+          authButton.onclick = popupAuth;
+          popupAuth();
+      }
+
+      /**
+       * Do the popup auth.
        */
       function popupAuth(){
-          mdHtmlDisplay.innerHTML = "<p><br/><br/>Please allow the popup window to authorize the access.</p>";
           gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'authuser':''},
                               handleAuthResult);
       }
@@ -110,7 +129,7 @@
       /**
        * Check if userId, if not right popup a auth window
        *
-       * @param (Object) the userid in page request.
+       * @userId (Object) the userid in page request.
        * @docId (String) the document id.
        */
       function checkAuthuser(userId, docId){
@@ -119,13 +138,13 @@
               'path': '/oauth2/v1/tokeninfo/?access_token=' + accessToken,
               'method': 'GET'});
           callback = function(resp) {
-              if(resp.user_id.toString() !== userId.toString()) {
+              if(userId===null || resp.user_id.toString() !== userId.toString()) {
                   authuserIndex++;
                   if(authuserIndex < authuserIndexLimit){
                      checkAuth();
                   }
                   else{
-                     popupAuth();
+                     doAuth();
                   }
               }
               else{
@@ -141,8 +160,6 @@
        * @param {Object} authResult Authorization result.
        */
       function handleAuthResult(authResult) {
-        var authButton = document.getElementById('authorizeButton');
-        authButton.style.display = 'none';
         if (authResult && !authResult.error) {
           // Access token has been successfully retrieved, requests can be sent to the API.
           var queryState = qs("state");
@@ -162,8 +179,8 @@
               mdHtmlDisplay.innerHTML = "<p><br/><br/>No md file to view.</p>";
           }
         } else {
-          // No access token could be retrieved, show the button to start the authorization flow.
-          popupAuth();
+          // No access token could be retrieved, start the authorization flow.
+          doAuth();
         }
       }
 
