@@ -63,6 +63,22 @@
       }
 
       /**
+       * Get the folder link of a docuemnt.
+       *
+       * @param (Object) file object.
+       *
+       */
+      function getFolderLink(fileObject){
+          var index = fileObject.alternateLink.indexOf('/file/d');
+          if(index === -1){
+              return '';
+          }
+          var base = fileObject.alternateLink.substring(0, index);
+          var folderId = fileObject.parents[fileObject.parents.length-1].id;
+          return base + "/?authuser=" + authuserIndex.toString() + "#folders/" + folderId;
+      }
+
+      /**
        * Called for get the info of a document.
        *
        * @param {String} id Document id.
@@ -74,8 +90,12 @@
               'method': 'GET'});
           callback = function(resp) {
               if(!resp.error){
-                  appendLink(topNav, getOutboundLink(id), resp.title, 'Please right click copy the link address for sharing.');
+
+                  appendLink(topNav, getOutboundLink(id), "|" + resp.title + "|", 'Please right click copy the link address for sharing.');
                   document.title = "[" + resp.title + "]" + "mdReader -- Markdown reader for Google Drive";
+
+                  appendLink(topNav, getFolderLink(resp), '|Open Folder|', 'Open the folder containing this document.');
+
                   if(resp.downloadUrl){
                       getDocumentContent(resp.downloadUrl);
                   }
