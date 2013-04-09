@@ -73,6 +73,9 @@
           if(index === -1){
               return '';
           }
+          if(fileObject.parents.length < 1){
+              return '';
+          }
           var base = fileObject.alternateLink.substring(0, index);
           var folderId = fileObject.parents[fileObject.parents.length-1].id;
           return base + "/?authuser=" + authuserIndex.toString() + "#folders/" + folderId;
